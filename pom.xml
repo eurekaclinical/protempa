@@ -22,12 +22,12 @@
     <parent>
         <groupId>org.eurekaclinical</groupId>
         <artifactId>eurekaclinical-parent-standard-deps</artifactId>
-        <version>4-Alpha-4-SNAPSHOT</version>
+        <version>4-Alpha-4</version>
     </parent>
     
-    <properties>
+    <!--properties>
     	<maven.javadoc.skip>true</maven.javadoc.skip>
-    </properties>
+    </properties-->
 
     <scm>
         <connection>scm:git:https://github.com/eurekaclinical/protempa.git</connection>
@@ -98,12 +98,12 @@
             <dependency>
                 <groupId>org.eurekaclinical</groupId>
                 <artifactId>javautil</artifactId>
-                <version>4.5-SNAPSHOT</version>
+                <version>4.5</version>
             </dependency>
             <dependency>
                 <groupId>org.eurekaclinical</groupId>
                 <artifactId>datastore</artifactId>
-                <version>3.3-SNAPSHOT</version>
+                <version>3.3</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -136,6 +136,15 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>appassembler-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                	<additionalOptions>
+                    	<additionalOption>-Xdoclint:none</additionalOption>
+                    </additionalOptions>
+                </configuration>
             </plugin>
         </plugins>
     </build>
