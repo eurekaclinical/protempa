@@ -25,9 +25,9 @@
         <version>4-Alpha-4</version>
     </parent>
     
-    <!--properties>
+    <properties>
     	<maven.javadoc.skip>true</maven.javadoc.skip>
-    </properties-->
+    </properties>
 
     <scm>
         <connection>scm:git:https://github.com/eurekaclinical/protempa.git</connection>
@@ -103,7 +103,7 @@
             <dependency>
                 <groupId>org.eurekaclinical</groupId>
                 <artifactId>datastore</artifactId>
-                <version>3.3</version>
+                <version>3.4-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

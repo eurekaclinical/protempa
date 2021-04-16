@@ -367,9 +367,10 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
     @Override
     public final void close() throws TabularWriterException {
         try {
-        	logger.log(Level.FINEST, "CLOSING recordHandler: {0}", this.recordHandler.getClass().getName());
-        	if(this.recordHandler != null)
+        	if(this.recordHandler != null) {
+        		logger.log(Level.FINEST, "CLOSING recordHandler: {0}", this.recordHandler.getClass().getName());
         		this.recordHandler.close();
+        	}
         	if(this.handlerList != null && this.handlerList.size() > 0) {
         		logger.log(Level.FINEST, "Dealing with handlers in list: {0}", this.handlerList.size());
         		for(String tableName: this.getHandlerList().keySet()) {

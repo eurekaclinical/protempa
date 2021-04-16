@@ -184,6 +184,7 @@ final class Executor implements AutoCloseable {
             try {
                 this.handleQueryResultThread.join();
                 for (QueryException e : handleQueryResultThread.getExceptions()) {
+                    log(Level.FINE, "Exceptions in handleQueryResultThread:" + e.toString());
                     if (this.exception == null) {
                         this.exception = e;
                     } else {
