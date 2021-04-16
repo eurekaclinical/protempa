@@ -24,7 +24,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.backend.dsb.filter.PropertyValueFilter;
@@ -42,6 +45,8 @@ import org.protempa.proposition.value.ValueVisitor;
 
 public abstract class AbstractWhereClause implements WhereClause {
 
+    private static final Logger LOGGER = Logger.getLogger(AbstractWhereClause.class.toString());
+    
     private final Set<String> propIds;
     private final ColumnSpecInfo info;
     private final List<EntitySpec> entitySpecs;
@@ -416,11 +421,15 @@ public abstract class AbstractWhereClause implements WhereClause {
         // Filter propIds that are not in the entitySpecPropIds array.
         List<String> filteredPropIds = new ArrayList<>(
                 entitySpecPropIds.length);
+        LOGGER.log(Level.FINE, "propIds {0}: ", new Object[]{StringUtils.join(propIds, ",")});
         for (String propId : propIds) {
             if (entitySpecPropIdsSet.contains(propId)) {
                 filteredPropIds.add(propId);
             }
         }
+        LOGGER.log(Level.FINE, "filteredPropIds {0}: ", new Object[]{StringUtils.join(filteredPropIds, ",")});
+        LOGGER.log(Level.FINE, "Sizes: filteredPropIds {0}::entitySpecPropIds {1}: ", new Object[]{filteredPropIds.size(),entitySpecPropIds.length * 0.85f});
+        
         return (filteredPropIds.size() < entitySpecPropIds.length * 0.85f)
                 && (filteredPropIds.size() <= 2000);
     }
