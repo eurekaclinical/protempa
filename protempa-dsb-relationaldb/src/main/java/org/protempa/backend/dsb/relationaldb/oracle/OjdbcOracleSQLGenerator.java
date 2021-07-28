@@ -64,8 +64,9 @@ public class OjdbcOracleSQLGenerator extends AbstractSQLGenerator {
     private static final DatabaseVersion ALT_MAX_DATABASE_VERSION = new DatabaseVersion(11, Integer.MAX_VALUE);
     //for CDWS and CDWP
     private static final DriverVersion MIN_DRIVER_VERSION = new DriverVersion(12, 0);
-    private static final DatabaseVersion MIN_DATABASE_VERSION = new DatabaseVersion(12, 0);
-    private static final DatabaseVersion MAX_DATABASE_VERSION = new DatabaseVersion(12, Integer.MAX_VALUE);
+    //CDWP is now at Oracle 19
+    private static final DatabaseVersion MIN_DATABASE_VERSION = new DatabaseVersion(19, 0);
+    private static final DatabaseVersion MAX_DATABASE_VERSION = new DatabaseVersion(19, Integer.MAX_VALUE);
     
     private static Logger logger = Logger.getLogger(OjdbcOracleSQLGenerator.class.getName());
 
